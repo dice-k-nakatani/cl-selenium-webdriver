@@ -2,7 +2,14 @@
   :description "cl-selenim-webdriver is a binding library to the Selenium 2.0"
   :author "TatriX <tatrics@gmail.com>"
   :license "MIT"
-  :depends-on (:dexador :quri :cl-json :alexandria :split-sequence)
+  :depends-on (:dexador
+               :quri
+               :cl-json
+               :jsown
+               :alexandria
+               :split-sequence
+               :series
+               )
   :serial t
   :components ((:module "src"
                 :components

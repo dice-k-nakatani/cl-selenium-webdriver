@@ -5,16 +5,16 @@
 
 (defun protocol-error-status (error)
   (with-slots (body) error
-    (assoc-value body :status)))
+    (jsown:val body "status")))
 
 (defmethod print-object ((error protocol-error) stream)
   (with-slots (body) error
     (format stream
             "[~a]~%status: ~a~%state: ~a~%~%~a~%"
             (type-of error)
-            (assoc-value body :status)
-            (assoc-value body :state)
-            (assoc-value (assoc-value body :value) :message))))
+            (jsown:val body "status")
+            (jsown:val body "state")
+            (jsown:val (jsown:val body "value") "message"))))
 
 (define-condition find-error (error)
   ((value :initarg :value)

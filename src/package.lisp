@@ -1,7 +1,10 @@
 ;;;; package.lisp
 
 (defpackage cl-selenium
-  (:use :cl)
+  (:use
+   :cl
+   :series
+   )
   (:export :make-session
            :delete-session
            :with-session
@@ -48,7 +51,11 @@
            :no-such-element-error)
   (:import-from :alexandria
                 :with-gensyms
-                :assoc-value))
+                :assoc-value
+                :if-let
+                :when-let
+                :when-let*
+                ))
 
 (defpackage cl-selenium-utils
   (:use :cl :cl-selenium)

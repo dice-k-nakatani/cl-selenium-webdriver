@@ -1,7 +1,7 @@
 (in-package :cl-selenium)
 
 (defun (setf url) (url &key (session *session*))
-  (http-post-value (session-path session "/url") `(:url ,url)))
+  (http-post-value (session-path session "/url") `(:obj ("url" . ,url))))
 
 (defun url (&key (session *session*))
   (http-get-value (session-path session "/url")))
@@ -9,17 +9,17 @@
 (defun back (&key (session *session*))
   (http-post-check (session-path session "/back")))
 
-(defclass element ()
-  ((id :initarg :id
-       :initform (error "Must supply :id")
-       :reader element-id)))
+;;(defclass element ()
+;;  ((id :initarg :id
+;;       :initform (error "Must supply :id")
+;;       :reader element-id)))
 
-(defmethod print-object ((element element) stream)
-  (with-slots (id) element
-    (format stream
-            "#<cl-selenium::element {id:~a} id=~a>"
-            id
-            (element-attribute element "id"))))
+;;(defmethod print-object ((element element) stream)
+;;  (with-slots (id) element
+;;    (format stream
+;;            "#<cl-selenium::element {id:~a} id=~a>"
+;;            id
+;;            (element-attribute element "id"))))
 
 (defun handle-find-error (err &key value by)
   (error
@@ -28,14 +28,18 @@
      (10 (make-instance 'stale-element-reference :value value :by by))
      (t err))))
 
-(defun find-element (value &key (by :css-selector) (session *session*))
+(defun find-element (value &key
+                             (by :xpath)
+                             ;;:css-selector)
+                             (session *session*))
   (handler-case
-      (let ((response (http-post (session-path session "/element") `(:value ,value :using ,(by by)))))
+      (let ((response (http-post (session-path session "/element") `(:obj ("value" . ,value) ("using"  . ,(by by))))))
         ;; TODO: find/write json -> clos
-        (if (= 0 (cdr (assoc :status response)))
-            (make-instance 'element
-                           :id (cdadr (assoc :value response)))
-            (error 'protocol-error :body response)))
+        ;;(error response)
+        (if (= 0 (jsown:val response "status"))
+            (jsown:val (jsown:val response "value") "ELEMENT")
+          ;;(make-instance 'element :id (cdadr (assoc :value response)))
+          (error 'protocol-error :body response)))
     (protocol-error (err) (handle-find-error err :value value :by by))))
 
 (defun find-elements (value &key (by :css-selector) (session *session*))
@@ -89,6 +93,9 @@
 
 (defun element-attribute (element name &key (session *session*))
   (http-get-value (session-path session "/element/~a/attribute/~a" (element-id element) name)))
+
+(defun source (&key (session *session*))
+  (http-get-value (session-path session "/source")))
 
 (defun log-types (&key (session *session*))
   (http-get-value (session-path session "/log/types")))

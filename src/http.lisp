@@ -11,11 +11,15 @@
 
 ;; json
 
-(defun encode (plist)
-  (cl-json:encode-json-plist-to-string plist))
+(defun encode (obj)
+  ;;(cl-json:encode-json-plist-to-string plist)
+  ;;(cl-json:encode-json-plist-to-string obj)
+  (jsown:to-json obj)
+  )
 
 (defun decode (json)
-  (cl-json:decode-json-from-string json))
+  ;;(cl-json:decode-json-from-string json))
+  (jsown:parse json))
 
 ;; http
 
@@ -24,10 +28,10 @@
      (dex:http-request-failed (err) (error 'protocol-error :body (decode (dex:response-body err))))))
 
 (defun check (response)
-  (zerop (assoc-value response :status)))
+  (zerop (jsown:val response "status")))
 
 (defun value (response)
-  (assoc-value response :value))
+  (jsown:val response "value"))
 
 (defun http-get (path)
   (with-decode-and-handler
@@ -40,7 +44,6 @@
   (check (http-get path)))
 
 (defun http-post (path &optional params)
-  ;; (format t "Sending ~a -> ~a~%" (encode params) path)
   (with-decode-and-handler
       (dex:post (make-uri path)
                 :content (encode params)
@@ -58,3 +61,5 @@
 
 (defun http-delete-check (path)
   (check (http-delete path)))
+
+ 
